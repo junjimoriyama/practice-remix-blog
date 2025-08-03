@@ -1,18 +1,19 @@
 import { useLoaderData } from '@remix-run/react'
 import React from 'react'
+import { Article } from '~/services/cms/articles/types';
 import { client } from '~/services/cms/client'
 
 export const loader = async () => {
 
   const now = new Date().toISOString();
-  
+
   return {
     blogs: await client.get({
     endpoint: "blog",
     queries: {
       limit: 1,
       orders: "-publishedAt",
-      filters: `visibleUntil[greater_than]${now}`
+      filters: `endDate[greater_than]${now}`
     }
   })
   }
@@ -22,23 +23,18 @@ const blogs = () => {
 
   const { blogs } = useLoaderData<typeof loader>();
 
-  const display = blogs.contents
-
-  console.log(display)
+  console.log(blogs.contents); 
 
   return (
-      <ul>{display.map((blog: any) => (
-         <li key={blog.id}>{blog.title}</li>
-        // <>
-        // {
-        //   blog.isShow && <>
-           
-        //     <li>{blog.isShow ? "表示" : "非表示"}</li>
-        //   </>
-        // }
-        // </>
+       <ul>
+      {blogs.contents.map((blog: Article) => (
+        <li key={blog.id}>
+          <h2>{blog.title}</h2>
+          {/* HTMLをそのまま描画 */}
+          <div dangerouslySetInnerHTML={{ __html: blog.body }} />
+        </li>
       ))}
-      </ul>
+    </ul>
   )
 }
 
